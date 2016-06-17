@@ -29,10 +29,6 @@ FROM ubuntu:trusty
 RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys E871F18B51E0147C77796AC81196BA81F6B0FC61
 RUN echo deb http://ppa.launchpad.net/zfs-native/stable/ubuntu trusty main > /etc/apt/sources.list.d/zfs.list
 
-# add llvm repo
-RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 6084F3CF814B57C1CF12EFD515CF4D18AF4F7421
-RUN echo deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty main > /etc/apt/sources.list.d/llvm.list
-
 # Packaged dependencies
 RUN apt-get update && apt-get install -y \
 	apparmor \
@@ -41,7 +37,7 @@ RUN apt-get update && apt-get install -y \
 	bash-completion \
 	btrfs-tools \
 	build-essential \
-	clang-3.8 \
+	clang \
 	createrepo \
 	curl \
 	dpkg-sig \
@@ -66,9 +62,7 @@ RUN apt-get update && apt-get install -y \
 	xfsprogs \
 	libzfs-dev \
 	tar \
-	--no-install-recommends \
-	&& ln -snf /usr/bin/clang-3.8 /usr/local/bin/clang \
-	&& ln -snf /usr/bin/clang++-3.8 /usr/local/bin/clang++
+	--no-install-recommends
 
 # Get lvm2 source for compiling statically
 ENV LVM2_VERSION 2.02.103
