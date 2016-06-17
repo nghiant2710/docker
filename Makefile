@@ -50,6 +50,7 @@ DOCKER_MOUNT := $(if $(BIND_DIR),-v "$(CURDIR)/$(BIND_DIR):/go/src/github.com/do
 
 GIT_BRANCH := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
 DOCKER_IMAGE := docker-dev$(if $(GIT_BRANCH),:$(GIT_BRANCH))
+DOCKER_IMAGE_CROSS := docker-cross$(if $(GIT_BRANCH),:$(GIT_BRANCH))
 DOCKER_DOCS_IMAGE := docker-docs$(if $(GIT_BRANCH),:$(GIT_BRANCH))
 
 DOCKER_FLAGS := docker run --rm -i --privileged $(DOCKER_ENVS) $(DOCKER_MOUNT)
@@ -63,6 +64,7 @@ ifeq ($(INTERACTIVE), 1)
 endif
 
 DOCKER_RUN_DOCKER := $(DOCKER_FLAGS) "$(DOCKER_IMAGE)"
+DOCKER_RUN_DOCKER_CROSS := $(DOCKER_FLAGS) "$(DOCKER_IMAGE_CROSS)"
 
 default: binary
 
@@ -78,11 +80,18 @@ build: bundles
 bundles:
 	mkdir bundles
 
-cross: build
-	$(DOCKER_RUN_DOCKER) hack/make.sh dynbinary binary cross
+cross: build-cross
+	$(DOCKER_RUN_DOCKER_CROSS) hack/make.sh dynbinary binary cross
 
 deb: build
 	$(DOCKER_RUN_DOCKER) hack/make.sh dynbinary build-deb
+
+build-cross:
+	head -n -2 Dockerfile > .DockerfileCross.swp
+	cat Dockerfile.cross >> .DockerfileCross.swp
+	tail -n 2 Dockerfile >> .DockerfileCross.swp
+	docker build -t "$(DOCKER_IMAGE_CROSS)" -f .DockerfileCross.swp .
+	rm .DockerfileCross.swp
 
 docs:
 	$(MAKE) -C docs docs
